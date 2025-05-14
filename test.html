@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra Tính Cách DISC (Theo Trang)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #test-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .category-page {
+            display: none; /* Ẩn theo mặc định */
+        }
+
+        .category-page.active {
+            display: block; /* Hiện trang hiện tại */
+        }
+
+        .question-section h2 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        
+        .question-block {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .question-block:last-child {
+            border-bottom: none;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .options label:hover {
+            background-color: #e9e9e9;
+        }
+        
+        .options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .navigation-buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        #submit-btn {
+             background-color: #5cb85c;
+        }
+
+        .nav-btn:hover {
+            opacity: 0.9;
+        }
+        .nav-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+
+        #results-container {
+            margin-top: 30px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            display: none; /* Ẩn ban đầu */
+        }
+        
+        #results-container h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .result-category {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .result-category strong {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="test-container">
+        <h1>Bài Kiểm Tra Tính Cách DISC</h1>
+        <p id="instructions">Vui lòng chọn một đáp án phù hợp nhất với bạn cho mỗi câu hỏi. Nhấn "Tiếp theo" để chuyển sang phần kế tiếp.</p>
+        
+        <form id="disc-form">
+            </form>
+
+        <div class="navigation-buttons">
+            <button id="next-btn" class="nav-btn">Tiếp theo</button>
+        </div>
+    </div>
+
+    <div id="results-container">
+        <h2>Kết Quả DISC Của Bạn</h2>
+        <div id="result-details">
+            </div>
+    </div>
+
+    <script>
+        const allQuestionsData = {
+            D: [ // PHẦN D - QUYẾT ĐOÁN
+                { id: "d1", text: "Khi đối mặt với một vấn đề khó khăn, bạn sẽ:", optionA: "Nhanh chóng đưa ra quyết định và hành động.", optionB: "Tìm kiếm ý kiến của người khác trước khi hành động.", category: "D" },
+                { id: "d2", text: "Bạn cảm thấy thế nào khi phải lãnh đạo một nhóm?", optionA: "Thích và tự tin khi ra quyết định.", optionB: "Cảm thấy lo lắng và cần sự hỗ trợ từ người khác.", category: "D" },
+                { id: "d3", text: "Khi có một mục tiêu, bạn thường:", optionA: "Quyết tâm hoàn thành mục tiêu dù có bất kỳ khó khăn nào.", optionB: "Chắc chắn muốn hoàn thành, nhưng sẽ tìm cách làm việc hòa hợp với người khác.", category: "D" },
+                { id: "d4", text: "Khi đối mặt với một tình huống căng thẳng, bạn sẽ:", optionA: "Nhanh chóng hành động để giải quyết vấn đề.", optionB: "Cảm thấy bối rối và cần thời gian suy nghĩ.", category: "D"},
+                { id: "d5", text: "Trong công việc, bạn cảm thấy thế nào khi phải làm việc độc lập?", optionA: "Bạn thích tự mình làm mọi thứ và hoàn toàn kiểm soát công việc.", optionB: "Bạn cảm thấy không thoải mái và thích làm việc nhóm.", category: "D"},
+                { id: "d6", text: "Bạn có xu hướng:", optionA: "Chấp nhận thử thách mới và sẵn sàng đối mặt với những tình huống không lường trước.", optionB: "Tránh rủi ro và thích duy trì sự ổn định trong công việc.", category: "D"},
+                { id: "d7", text: "Khi có mâu thuẫn trong nhóm, bạn thường:", optionA: "Đối mặt và giải quyết ngay lập tức.", optionB: "Tránh xa và hy vọng mâu thuẫn sẽ tự giải quyết.", category: "D"},
+                { id: "d8", text: "Bạn có cảm giác như thế nào về việc phải ra quyết định quan trọng?", optionA: "Hứng thú và cảm thấy tự tin khi đưa ra quyết định.", optionB: "Cảm thấy lo lắng và cần ý kiến từ người khác.", category: "D"},
+                { id: "d9", text: "Khi làm việc với một nhóm, bạn có xu hướng:", optionA: "Đưa ra quyết định và yêu cầu mọi người làm theo.", optionB: "Thảo luận và nghe ý kiến của mọi người trước khi đưa ra quyết định.", category: "D"},
+                { id: "d10", text: "Bạn cảm thấy thế nào khi phải làm công việc mà không có sự giám sát?", optionA: "Bạn cảm thấy tự do và kiểm soát được công việc.", optionB: "Bạn cảm thấy lo lắng và cần sự chỉ đạo từ cấp trên.", category: "D"},
+                { id: "d11", text: "Khi đối diện với khó khăn, bạn:", optionA: "Không ngần ngại thử nghiệm các phương pháp mới và đối mặt với thử thách.", optionB: "Cảm thấy bối rối và cần sự hướng dẫn từ người khác.", category: "D"},
+                { id: "d12", text: "Bạn có thích tạo ra thay đổi trong môi trường làm việc không?", optionA: "Rất thích tạo ra sự thay đổi và cải tiến.", optionB: "Bạn thích giữ mọi thứ ổn định và theo quy trình hiện tại.", category: "D"},
+                { id: "d13", text: "Khi có một cơ hội mới, bạn thường:", optionA: "Dám thử và chấp nhận thử thách ngay lập tức.", optionB: "Do dự và cần phải cân nhắc kỹ lưỡng trước khi quyết định.", category: "D"},
+                { id: "d14", text: "Khi bạn phải hoàn thành một dự án có deadline chặt chẽ, bạn thường:", optionA: "Lập kế hoạch và làm việc không ngừng nghỉ để hoàn thành đúng hạn.", optionB: "Cảm thấy căng thẳng và lo lắng, nhưng vẫn cố gắng hoàn thành.", category: "D"},
+                { id: "d15", text: "Khi một đồng nghiệp đưa ra ý tưởng trái ngược với quan điểm của bạn, bạn sẽ:", optionA: "Thẳng thắn đưa ra ý kiến của mình và bảo vệ quan điểm.", optionB: "Lắng nghe và thử xem xét ý tưởng của người đó.", category: "D"},
+                { id: "d16", text: "Bạn có cảm thấy thoải mái khi phải đưa ra quyết định khó khăn mà không có đủ thông tin?", optionA: "Cảm thấy thoải mái và sẵn sàng ra quyết định.", optionB: "Do dự và cảm thấy cần thêm thời gian để phân tích.", category: "D"},
+                { id: "d17", text: "Bạn có xu hướng (D2):", optionA: "Kiên quyết trong việc thực hiện kế hoạch của mình, mặc dù có thể gặp phải sự phản đối.", optionB: "Cố gắng thuyết phục người khác đồng tình với quan điểm của mình trước khi thực hiện.", category: "D"}, // Dùng D2 để phân biệt id nếu câu hỏi tương tự
+                { id: "d18", text: "Khi có một sự thay đổi đột ngột trong công việc, bạn (D-focused):", optionA: "Lập tức thích nghi và tìm cách vượt qua.", optionB: "Cảm thấy không thoải mái và cần thời gian để làm quen với thay đổi.", category: "D"}
+            ],
+            I: [ // PHẦN I - ẢNH HƯỞNG
+                { id: "i1", text: "Khi bạn làm việc trong một nhóm, bạn cảm thấy thế nào?", optionA: "Hào hứng và tận hưởng các cuộc trò chuyện và sự gắn kết.", optionB: "Tập trung vào nhiệm vụ và ít giao tiếp.", category: "I" },
+                { id: "i2", text: "Bạn có thể mô tả mình là người:", optionA: "Hướng ngoại, thích nói chuyện và tạo ảnh hưởng đến người khác.", optionB: "Ít nói, nhưng luôn lắng nghe và xử lý công việc hiệu quả.", category: "I" },
+                { id: "i3", text: "Bạn thường thích làm gì trong thời gian rảnh?", optionA: "Tham gia các hoạt động xã hội và gặp gỡ bạn bè.", optionB: "Thích ở một mình hoặc với gia đình, làm những hoạt động cá nhân.", category: "I" },
+                { id: "i4", text: "Khi bạn tham gia một cuộc họp nhóm, bạn thường:", optionA: "Là người chủ động dẫn dắt cuộc trò chuyện và thảo luận.", optionB: "Ngồi im lặng và lắng nghe những người khác.", category: "I"},
+                { id: "i5", text: "Bạn cảm thấy thế nào khi phải làm việc với những người ít giao tiếp?", optionA: "Bạn thấy thiếu động lực và cảm thấy khó khăn khi không có sự giao tiếp.", optionB: "Bạn không vấn đề với việc làm việc một mình và vẫn có thể tập trung vào công việc.", category: "I"},
+                { id: "i6", text: "Khi bạn tổ chức một sự kiện, bạn sẽ:", optionA: "Lên kế hoạch chi tiết và truyền cảm hứng cho những người khác tham gia.", optionB: "Giao phó cho người khác và chỉ tham gia nếu cần thiết.", category: "I"},
+                { id: "i7", text: "Bạn có thích tham gia vào các hoạt động xã hội không?", optionA: "Rất thích và luôn tìm kiếm cơ hội để gặp gỡ, kết nối với mọi người.", optionB: "Thỉnh thoảng tham gia nhưng không quá hào hứng.", category: "I"},
+                { id: "i8", text: "Khi làm việc với nhóm, bạn cảm thấy thế nào khi nhận được sự chú ý từ người khác?", optionA: "Bạn rất thích được mọi người chú ý và ghi nhận.", optionB: "Bạn không thích bị chú ý và muốn làm việc một cách âm thầm.", category: "I"},
+                { id: "i9", text: "Khi gặp gỡ những người mới, bạn:", optionA: "Dễ dàng kết nối và bắt chuyện với họ.", optionB: "Thích quan sát và tìm hiểu trước khi bắt đầu cuộc trò chuyện.", category: "I"},
+                { id: "i10", text: "Bạn cảm thấy thế nào khi cần thuyết phục người khác về ý tưởng của mình?", optionA: "Rất tự tin và có thể thuyết phục người khác một cách dễ dàng.", optionB: "Cảm thấy lo lắng và cần thời gian chuẩn bị kỹ lưỡng trước khi thuyết phục.", category: "I"},
+                { id: "i11", text: "Khi bạn ở trong một môi trường mới, bạn có xu hướng:", optionA: "Chủ động tiếp cận và làm quen với mọi người.", optionB: "Chờ đợi người khác đến làm quen với bạn.", category: "I"},
+                { id: "i12", text: "Khi tham gia một sự kiện lớn, bạn cảm thấy:", optionA: "Hào hứng và muốn gặp gỡ càng nhiều người càng tốt.", optionB: "Cảm thấy mệt mỏi và thích dành thời gian cho những người quen thuộc.", category: "I"},
+                { id: "i13", text: "Bạn có thích làm việc trong môi trường có nhiều người không?", optionA: "Rất thích và cảm thấy có động lực khi làm việc với nhiều người.", optionB: "Bạn thích làm việc trong môi trường yên tĩnh, ít người.", category: "I"},
+                { id: "i14", text: "Khi tham gia một cuộc họp (I2):", optionA: "Chủ động phát biểu và đưa ra các ý tưởng mới.", optionB: "Chờ đợi người khác phát biểu trước rồi mới tham gia.", category: "I"},
+                { id: "i15", text: "Bạn cảm thấy thế nào khi làm việc với những người có tính cách ít nói hoặc thụ động (I2)?", optionA: "Cảm thấy hơi khó khăn và cần tạo ra những cuộc trò chuyện để kết nối.", optionB: "Cảm thấy thoải mái và tập trung vào công việc mà không cần giao tiếp quá nhiều.", category: "I"},
+                { id: "i16", text: "Bạn có xu hướng (I2):", optionA: "Thích kết nối với nhiều người và duy trì các mối quan hệ rộng rãi.", optionB: "Thích giữ những mối quan hệ gần gũi, ít người nhưng sâu sắc.", category: "I"},
+                { id: "i17", text: "Bạn cảm thấy thế nào khi phải đứng trước đám đông để thuyết trình?", optionA: "Thích thú và cảm thấy tự tin khi thuyết trình.", optionB: "Cảm thấy căng thẳng và lo lắng về việc bị đánh giá.", category: "I"},
+                { id: "i18", text: "Khi bạn có một ý tưởng sáng tạo, bạn thường:", optionA: "Chia sẻ với mọi người và muốn họ đồng tình với bạn.", optionB: "Lắng nghe ý kiến của người khác trước khi quyết định có chia sẻ hay không.", category: "I"}
+            ],
+            S: [ // PHẦN S - ỔN ĐỊNH
+                { id: "s1", text: "Bạn cảm thấy thế nào khi có sự thay đổi đột ngột trong công việc?", optionA: "Cảm thấy khó chịu và cần một thời gian để thích nghi.", optionB: "Chấp nhận sự thay đổi và cố gắng thích nghi ngay lập tức.", category: "S" },
+                { id: "s2", text: "Khi giải quyết vấn đề trong công việc, bạn thường:", optionA: "Bình tĩnh và làm việc cẩn thận, không vội vàng.", optionB: "Đưa ra quyết định nhanh chóng và không lo lắng về các chi tiết nhỏ.", category: "S" },
+                { id: "s3", text: "Bạn thích môi trường làm việc như thế nào?", optionA: "Yên tĩnh, ổn định, và có thể làm việc theo kế hoạch.", optionB: "Linh hoạt, có sự thay đổi và thử thách liên tục.", category: "S" },
+                { id: "s4", text: "Bạn cảm thấy thế nào khi mọi thứ không đi theo kế hoạch?", optionA: "Cảm thấy không thoải mái và cần thời gian để thích nghi.", optionB: "Dễ dàng chấp nhận sự thay đổi và tìm cách điều chỉnh.", category: "S"},
+                { id: "s5", text: "Bạn có xu hướng (S1):", optionA: "Làm việc theo một thói quen ổn định và không thích sự thay đổi đột ngột.", optionB: "Sẵn sàng thay đổi để cải thiện công việc hoặc môi trường làm việc.", category: "S"},
+                { id: "s6", text: "Khi bạn gặp phải xung đột trong công việc, bạn thường:", optionA: "Tìm cách giữ hòa bình và tránh những cuộc tranh cãi.", optionB: "Tìm cách giải quyết ngay lập tức, đôi khi có thể mạnh mẽ trong việc bảo vệ quan điểm của mình.", category: "S"},
+                { id: "s7", text: "Bạn thường cảm thấy thế nào khi làm việc dưới áp lực?", optionA: "Cảm thấy thoải mái và làm việc ổn định trong môi trường có áp lực.", optionB: "Cảm thấy căng thẳng và cần thời gian để ổn định cảm xúc.", category: "S"},
+                { id: "s8", text: "Khi gặp khó khăn trong công việc, bạn:", optionA: "Kiên nhẫn và không dễ dàng từ bỏ.", optionB: "Cảm thấy lo lắng và cần sự hỗ trợ từ người khác.", category: "S"},
+                { id: "s9", text: "Khi có sự thay đổi trong công việc, bạn (S2):", optionA: "Cảm thấy khó chịu và cần thời gian để thích nghi.", optionB: "Có thể điều chỉnh ngay lập tức và chấp nhận thay đổi một cách linh hoạt.", category: "S"},
+                { id: "s10", text: "Bạn có cảm thấy thoải mái khi làm việc dưới sự giám sát không?", optionA: "Cảm thấy không thoải mái và thích làm việc một mình.", optionB: "Bạn cảm thấy yên tâm và có thể làm việc hiệu quả hơn khi có sự giám sát.", category: "S"}, // Chú ý: Câu này có thể cần xem lại logic chấm điểm cho S
+                { id: "s11", text: "Bạn có xu hướng (S2):", optionA: "Đưa ra các quyết định chậm rãi và cân nhắc kỹ lưỡng trước khi hành động.", optionB: "Hành động nhanh chóng và đôi khi không quá lo lắng về các chi tiết.", category: "S"},
+                { id: "s12", text: "Bạn cảm thấy như thế nào khi làm việc với những người có tính cách khác biệt hoàn toàn?", optionA: "Bạn cảm thấy khó khăn và cần thời gian để thích nghi.", optionB: "Bạn dễ dàng hòa nhập và có thể làm việc hiệu quả với mọi người.", category: "S"},
+                { id: "s13", text: "Bạn có cảm thấy thoải mái khi làm việc trong môi trường có sự thay đổi liên tục?", optionA: "Cảm thấy bất an và không thoải mái với sự thay đổi.", optionB: "Cảm thấy thích thú và có thể thích nghi với sự thay đổi nhanh chóng.", category: "S"},
+                { id: "s14", text: "Khi làm việc nhóm, bạn cảm thấy (S3):", optionA: "Dễ dàng thích nghi với các thành viên khác và hòa đồng.", optionB: "Cảm thấy cần có một kế hoạch rõ ràng và ít thay đổi trong công việc.", category: "S"},
+                { id: "s15", text: "Bạn cảm thấy thế nào khi công việc có tiến triển chậm và không như kế hoạch (S2)?", optionA: "Cảm thấy bình tĩnh và tìm cách khắc phục vấn đề.", optionB: "Cảm thấy căng thẳng và cần sự hỗ trợ từ người khác.", category: "S"},
+                { id: "s16", text: "Khi gặp phải một vấn đề trong công việc, bạn thường (S2):", optionA: "Đưa ra các giải pháp ổn định và bền vững.", optionB: "Tìm kiếm giải pháp nhanh chóng để giải quyết vấn đề ngay lập tức.", category: "S"},
+                { id: "s17", text: "Bạn cảm thấy thế nào khi công việc không có sự phân công rõ ràng và thiếu tổ chức?", optionA: "Không thoải mái, cảm thấy cần một kế hoạch rõ ràng.", optionB: "Không vấn đề gì, bạn có thể thích nghi và điều chỉnh khi cần thiết.", category: "S"},
+                { id: "s18", text: "Khi mọi thứ trở nên hỗn loạn và không theo kế hoạch, bạn:", optionA: "Cảm thấy bối rối và khó khăn trong việc duy trì ổn định.", optionB: "Cảm thấy dễ dàng điều chỉnh và tiếp tục làm việc dù không theo kế hoạch.", category: "S"}
+            ],
+            C: [ // PHẦN C - CẨN THẬN
+                { id: "c1", text: "Khi làm một dự án, bạn thường:", optionA: "Lập kế hoạch chi tiết và kiểm tra tất cả các bước.", optionB: "Bắt đầu công việc ngay lập tức và chỉ lo lắng khi gặp vấn đề.", category: "C" },
+                { id: "c2", text: "Bạn cảm thấy thế nào khi công việc không được hoàn thành đúng hạn?", optionA: "Lo lắng và muốn tìm cách hoàn thiện công việc theo đúng yêu cầu.", optionB: "Cảm thấy không quá lo lắng và nghĩ rằng có thể xử lý sau.", category: "C" },
+                { id: "c3", text: "Khi cần đưa ra quyết định quan trọng, bạn thường:", optionA: "Phân tích kỹ lưỡng tất cả các yếu tố và dữ liệu liên quan.", optionB: "Hành động ngay, mặc dù có thể chưa có tất cả các thông tin.", category: "C" },
+                { id: "c4", text: "Bạn có xu hướng (C1):", optionA: "Chú trọng đến từng chi tiết nhỏ và làm việc chính xác.", optionB: "Thích hoàn thành công việc nhanh chóng, đôi khi bỏ qua chi tiết.", category: "C"},
+                { id: "c5", text: "Bạn có cảm thấy khó chịu khi công việc không hoàn hảo không?", optionA: "Rất khó chịu và luôn tìm cách để làm tốt hơn.", optionB: "Không quá lo lắng, miễn là công việc hoàn thành.", category: "C"},
+                { id: "c6", text: "Khi bạn cần hoàn thành một dự án, bạn thường:", optionA: "Lên kế hoạch kỹ càng và đảm bảo mọi thứ được thực hiện theo đúng kế hoạch.", optionB: "Bắt đầu làm việc và điều chỉnh khi cần thiết.", category: "C"},
+                { id: "c7", text: "Bạn thường đánh giá công việc của mình bằng cách nào?", optionA: "Dựa vào sự hoàn hảo và chính xác của công việc.", optionB: "Dựa vào kết quả chung và sự tiến triển của dự án.", category: "C"},
+                { id: "c8", text: "Bạn cảm thấy thế nào khi phải làm việc trong một môi trường không có tổ chức rõ ràng?", optionA: "Không thoải mái và cảm thấy khó khăn khi thiếu sự tổ chức.", optionB: "Bạn có thể làm việc trong môi trường không có sự tổ chức và tự điều chỉnh công việc.", category: "C"},
+                { id: "c9", text: "Khi làm việc trong một dự án dài hạn, bạn:", optionA: "Lên kế hoạch cẩn thận và theo dõi tiến độ chi tiết.", optionB: "Đôi khi để mọi thứ tự phát triển và không theo kế hoạch chặt chẽ.", category: "C"},
+                { id: "c10", text: "Bạn cảm thấy thế nào khi có những sai sót nhỏ trong công việc?", optionA: "Cảm thấy khó chịu và muốn sửa ngay lập tức.", optionB: "Không quá lo lắng, vì sai sót nhỏ không ảnh hưởng quá nhiều.", category: "C"},
+                { id: "c11", text: "Bạn có thích làm việc theo quy trình và kế hoạch rõ ràng không?", optionA: "Rất thích, vì giúp công việc dễ dàng và hiệu quả hơn.", optionB: "Không thích lắm, bạn thích có sự linh hoạt hơn trong công việc.", category: "C"},
+                { id: "c12", text: "Khi nhận được phản hồi về công việc, bạn cảm thấy:", optionA: "Cần phải cải thiện ngay lập tức và điều chỉnh công việc cho hoàn hảo.", optionB: "Lắng nghe và chỉ điều chỉnh nếu thực sự cần thiết.", category: "C"},
+                { id: "c13", text: "Bạn có xu hướng (C2):", optionA: "Kiểm tra lại công việc nhiều lần trước khi hoàn thành.", optionB: "Hoàn thành công việc và chuyển sang nhiệm vụ tiếp theo mà không phải kiểm tra quá nhiều.", category: "C"},
+                { id: "c14", text: "Khi bắt đầu một dự án mới, bạn thường (C2):", optionA: "Lập kế hoạch chi tiết và dành thời gian chuẩn bị kỹ càng.", optionB: "Bắt tay vào công việc ngay, dựa vào kinh nghiệm và sự phán đoán.", category: "C"},
+                { id: "c15", text: "Bạn cảm thấy thế nào khi công việc không đạt yêu cầu chất lượng mà bạn mong đợi?", optionA: "Rất khó chịu và sẽ tìm cách làm lại để hoàn thiện hơn.", optionB: "Bạn chấp nhận kết quả và tiếp tục làm việc để cải thiện trong tương lai.", category: "C"},
+                { id: "c16", text: "Bạn có xu hướng (C3):", optionA: "Tập trung vào các chi tiết nhỏ để đảm bảo công việc hoàn hảo.", optionB: "Chỉ quan tâm đến kết quả cuối cùng và làm nhanh chóng.", category: "C"},
+                { id: "c17", text: "Khi có một sai sót trong công việc, bạn thường:", optionA: "Kiểm tra lại mọi thứ và sửa chữa ngay lập tức.", optionB: "Chấp nhận sai sót và tiếp tục làm việc mà không quá lo lắng.", category: "C"},
+                { id: "c18", text: "Bạn cảm thấy thế nào khi không thể kiểm soát được tất cả các yếu tố trong công việc?", optionA: "Cảm thấy không thoải mái và cố gắng kiểm soát tình hình.", optionB: "Cảm thấy dễ dàng điều chỉnh và làm việc trong những điều kiện không hoàn hảo.", category: "C"}
+            ]
+        };
+
+        const NUM_QUESTIONS_TO_SELECT_PER_CATEGORY = 6;
+        const CATEGORIES = ['D', 'I', 'S', 'C'];
+        const CATEGORY_NAMES = {
+            D: "Quyết đoán (Dominance)",
+            I: "Ảnh hưởng (Influence)",
+            S: "Ổn định (Steadiness)",
+            C: "Cẩn thận (Conscientiousness)"
+        };
+
+        const formElement = document.getElementById('disc-form');
+        const nextButton = document.getElementById('next-btn');
+        const testContainer = document.getElementById('test-container');
+        const resultsContainer = document.getElementById('results-container');
+        const resultDetailsElement = document.getElementById('result-details');
+        const instructionsElement = document.getElementById('instructions');
+
+        let currentCategoryIndex = 0;
+        let selectedQuestionsByCategory = {}; // Lưu câu hỏi đã chọn cho mỗi phần
+        let userAnswers = {}; // Lưu câu trả lời của người dùng
+
+        // --- HÀM CHỌN NGẪU NHIÊN CÂU HỎI ---
+        function getRandomQuestions(questionArray, count) {
+            const shuffled = [...questionArray].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // --- HÀM TẠO VÀ HIỂN THỊ CÂU HỎI CHO MỘT PHẦN ---
+        function displayCategoryPage(categoryKey) {
+            const categoryQuestions = allQuestionsData[categoryKey];
+            if (!selectedQuestionsByCategory[categoryKey]) { // Chỉ chọn câu hỏi 1 lần cho mỗi phần
+                 if (categoryQuestions.length < NUM_QUESTIONS_TO_SELECT_PER_CATEGORY) {
+                    console.warn(`Không đủ ${NUM_QUESTIONS_TO_SELECT_PER_CATEGORY} câu hỏi cho phần ${categoryKey}. Lấy ${categoryQuestions.length} câu.`);
+                    selectedQuestionsByCategory[categoryKey] = [...categoryQuestions];
+                } else {
+                    selectedQuestionsByCategory[categoryKey] = getRandomQuestions(categoryQuestions, NUM_QUESTIONS_TO_SELECT_PER_CATEGORY);
+                }
+            }
+           
+            const questionsToDisplay = selectedQuestionsByCategory[categoryKey];
+            
+            let pageHTML = `<div class="category-page active" id="page-${categoryKey}">
+                                <div class="question-section">
+                                    <h2>Phần ${currentCategoryIndex + 1}: ${CATEGORY_NAMES[categoryKey]}</h2>`;
+            
+            questionsToDisplay.forEach((q, index) => {
+                const uniqueInputName = `cat-${categoryKey}-q-${q.id}`;
+                const answerA = userAnswers[uniqueInputName] === 'a' ? 'checked' : '';
+                const answerB = userAnswers[uniqueInputName] === 'b' ? 'checked' : '';
+
+                pageHTML += `
+                    <div class="question-block">
+                        <p class="question-text">Câu ${index + 1}: ${q.text}</p>
+                        <div class="options">
+                            <label>
+                                <input type="radio" name="${uniqueInputName}" value="a" data-category="${q.category}" ${answerA} required> ${q.optionA}
+                            </label>
+                            <label>
+                                <input type="radio" name="${uniqueInputName}" value="b" data-category="${q.category}" ${answerB}> ${q.optionB}
+                            </label>
+                        </div>
+                    </div>
+                `;
+            });
+            pageHTML += `   </div>
+                        </div>`;
+            
+            formElement.innerHTML = pageHTML; // Chỉ hiển thị trang hiện tại
+
+            if (currentCategoryIndex === CATEGORIES.length - 1) {
+                nextButton.textContent = 'Xem Kết Quả';
+                nextButton.id = 'submit-btn'; // Đổi ID để có thể style khác nếu muốn
+            } else {
+                nextButton.textContent = 'Tiếp theo';
+                nextButton.id = 'next-btn';
+            }
+        }
+        
+        // --- KIỂM TRA CÁC CÂU HỎI TRÊN TRANG HIỆN TẠI ĐÃ ĐƯỢC TRẢ LỜI CHƯA ---
+        function validateCurrentPage() {
+            const currentPageKey = CATEGORIES[currentCategoryIndex];
+            const questionsOnPage = selectedQuestionsByCategory[currentPageKey];
+            if (!questionsOnPage) return false; // Chưa có câu hỏi nào được load
+
+            for (const q of questionsOnPage) {
+                const uniqueInputName = `cat-${currentPageKey}-q-${q.id}`;
+                const radioButtons = formElement.elements[uniqueInputName];
+                if (radioButtons && !radioButtons.value) { // radioButtons.value sẽ có giá trị nếu 1 trong các nút được chọn
+                    return false; // Chưa trả lời câu này
+                }
+            }
+            return true; // Tất cả đã được trả lời
+        }
+
+        // --- LƯU CÂU TRẢ LỜI CỦA TRANG HIỆN TẠI ---
+        function saveCurrentPageAnswers() {
+            const currentPageKey = CATEGORIES[currentCategoryIndex];
+            const questionsOnPage = selectedQuestionsByCategory[currentPageKey];
+            if (!questionsOnPage) return;
+
+            questionsOnPage.forEach(q => {
+                const uniqueInputName = `cat-${currentPageKey}-q-${q.id}`;
+                const radioButtons = formElement.elements[uniqueInputName];
+                if (radioButtons && radioButtons.value) {
+                    userAnswers[uniqueInputName] = {
+                        value: radioButtons.value,
+                        category: q.category // Lưu category để tính điểm
+                    };
+                }
+            });
+        }
+
+
+        // --- HÀM TÍNH TỔNG ĐIỂM ---
+        function calculateTotalScores() {
+            const scores = { D: 0, I: 0, S: 0, C: 0 };
+            for (const inputName in userAnswers) {
+                const answerData = userAnswers[inputName];
+                if (answerData.value === 'a') {
+                    scores[answerData.category]++;
+                }
+            }
+            return scores;
+        }
+
+        // --- HÀM DIỄN GIẢI KẾT QUẢ (Dựa trên 6 câu/phần, max 6 điểm) ---
+        function interpretResults(scores) {
+            let interpretationsHTML = "";
+            
+            const scoreLimits = { low: 2, mid: 4, high: 6 }; // Ngưỡng điểm ví dụ
+
+            // Diễn giải D
+            let dInter = "";
+            if (scores.D <= scoreLimits.low) dInter = "Bạn ít quyết đoán và thích sự ổn định.";
+            else if (scores.D <= scoreLimits.mid) dInter = "Bạn có sự quyết đoán, đôi khi thích kiểm soát tình huống.";
+            else dInter = "Bạn rất quyết đoán và thích lãnh đạo.";
+            interpretationsHTML += `<div class="result-category"><strong>D (Quyết đoán): ${scores.D} điểm</strong> - ${dInter}</div>`;
+
+            // Diễn giải I
+            let iInter = "";
+            if (scores.I <= scoreLimits.low) iInter = "Bạn ít giao tiếp và thích sự yên tĩnh.";
+            else if (scores.I <= scoreLimits.mid) iInter = "Bạn giao tiếp tốt, nhưng không phải lúc nào cũng chủ động.";
+            else iInter = "Bạn là người hướng ngoại, thích giao tiếp và ảnh hưởng đến người khác.";
+            interpretationsHTML += `<div class="result-category"><strong>I (Ảnh hưởng): ${scores.I} điểm</strong> - ${iInter}</div>`;
+
+            // Diễn giải S
+            let sInter = "";
+            if (scores.S <= scoreLimits.low) sInter = "Bạn thích sự thay đổi và thử thách."; // Lưu ý: diễn giải có thể ngược lại cho S thấp
+            else if (scores.S <= scoreLimits.mid) sInter = "Bạn có tính ổn định nhưng cũng dễ dàng thích nghi với thay đổi.";
+            else sInter = "Bạn thích sự ổn định và cảm thấy khó chịu với sự thay đổi.";
+            interpretationsHTML += `<div class="result-category"><strong>S (Ổn định): ${scores.S} điểm</strong> - ${sInter}</div>`;
+
+            // Diễn giải C
+            let cInter = "";
+            if (scores.C <= scoreLimits.low) cInter = "Bạn là người hành động nhanh chóng và không quá chú trọng vào chi tiết.";
+            else if (scores.C <= scoreLimits.mid) cInter = "Bạn cân nhắc kỹ lưỡng, nhưng đôi khi không quá chi tiết.";
+            else cInter = "Bạn chú trọng đến chi tiết, lập kế hoạch và làm việc có tổ chức.";
+            interpretationsHTML += `<div class="result-category"><strong>C (Cẩn thận): ${scores.C} điểm</strong> - ${cInter}</div>`;
+            
+            let dominantTraits = [];
+            let maxScore = -1;
+            for(const cat in scores){
+                if(scores[cat] > maxScore){
+                    maxScore = scores[cat];
+                    dominantTraits = [CATEGORY_NAMES[cat]];
+                } else if (scores[cat] === maxScore) {
+                    dominantTraits.push(CATEGORY_NAMES[cat]);
+                }
+            }
+            if (dominantTraits.length > 0) {
+                 interpretationsHTML += `<p><strong>Đặc điểm nổi trội nhất của bạn có thể là: ${dominantTraits.join(' và ')}</strong></p>`;
+            }
+
+
+            resultDetailsElement.innerHTML = interpretationsHTML;
+            testContainer.style.display = 'none'; 
+            resultsContainer.style.display = 'block';
+            instructionsElement.style.display = 'none';
+        }
+        
+        // --- XỬ LÝ NÚT "TIẾP THEO" / "XEM KẾT QUẢ" ---
+        nextButton.addEventListener('click', () => {
+            if (!validateCurrentPage()) {
+                alert("Vui lòng trả lời tất cả các câu hỏi ở phần này trước khi tiếp tục.");
+                return;
+            }
+
+            saveCurrentPageAnswers();
+
+            if (currentCategoryIndex < CATEGORIES.length - 1) {
+                currentCategoryIndex++;
+                displayCategoryPage(CATEGORIES[currentCategoryIndex]);
+                window.scrollTo(0, 0); // Cuộn lên đầu trang mới
+            } else { // Đã ở trang cuối, nút này là "Xem Kết Quả"
+                const finalScores = calculateTotalScores();
+                interpretResults(finalScores);
+            }
+        });
+
+        // --- KHỞI TẠO BÀI TEST ---
+        function startTest() {
+            currentCategoryIndex = 0;
+            userAnswers = {}; // Xóa câu trả lời cũ nếu làm lại test
+            selectedQuestionsByCategory = {}; // Xóa câu hỏi đã chọn cũ
+            displayCategoryPage(CATEGORIES[currentCategoryIndex]);
+            testContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            instructionsElement.style.display = 'block';
+             nextButton.textContent = 'Tiếp theo';
+            nextButton.id = 'next-btn';
+
+        }
+
+        startTest(); // Bắt đầu bài test khi tải trang
+
+    </script>
+
+</body>
+</html>
